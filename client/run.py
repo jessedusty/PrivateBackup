@@ -17,13 +17,24 @@ class Client:
         self.username = "root"
         self.password = "root"
         self.usercmds = {"download":download.download}
+        self.syncing = False
+
+    def syncingIndicator(self):
+        if self.syncing == False:
+            self.syncing = True
+            print "Syncing.", 
+        else:
+            print ".",
 
     def run(self):  
         thread.start_new_thread(self.shell, ())
         while True:
+            self.syncing = False
             self.scandirs()
             self.scanfiles()
-            time.sleep(5)
+            if self.syncing == True:
+                print "\n Finished updating files! \n"
+            time.sleep(3)
 
 
     def scandirs(self):
@@ -34,10 +45,11 @@ class Client:
                     sock = socket.socket()
                     sock.connect((self.host, self.port))
                     mkdir.mkdir(sock, x, self.username, self.password)
-                    print "{0} Outgoing mkdir {1}".format(datetime.datetime.now(), x)
+                    #print "{0} Outgoing mkdir {1}".format(datetime.datetime.now(), x)
+                    self.syncingIndicator()
                 except Exception, e:
                     self.dirs.remove(x) # Remove it so that it is tried again later
-                time.sleep(0.5)
+                #time.sleep(0.5)
 
 
         for x,y,z in os.walk("files"):
@@ -49,10 +61,11 @@ class Client:
                         sock = socket.socket()
                         sock.connect((self.host, self.port))
                         mkdir.mkdir(sock, x, self.username, self.password)
-                        print "{0} Outgoing mkdir {1}".format(datetime.datetime.now(), x)
+                        #print "{0} Outgoing mkdir {1}".format(datetime.datetime.now(), x)
+                        self.syncingIndicator()
                     except Exception, e:
                         self.dirs.remove(x) # Remove it so that it is tried again later
-                    time.sleep(0.5)
+                    #time.sleep(0.5)
 
     def scanfiles(self):
         for root, dirs, files in os.walk("files"):
@@ -64,12 +77,13 @@ class Client:
                         sock = socket.socket()
                         sock.connect((self.host, self.port))
                         upload.upload(sock, check, self.username, self.password)
-                        print "{0} Outgoing file transfer {1}".format(datetime.datetime.now(), check)
+                        #print "{0} Outgoing file transfer {1}".format(datetime.datetime.now(), check)
+                        self.syncingIndicator()
                     except Exception, e:
                         #print e
                         del self.files[check]
                     
-                    time.sleep(0.5)
+                    #time.sleep(0.5)
 
                 else:
                     with open(check, 'rb') as file:
@@ -79,11 +93,12 @@ class Client:
                                 sock = socket.socket()
                                 sock.connect((self.host, self.port))
                                 upload.upload(sock, check, self.username, self.password)
-                                print "{0} Outgoing file transfer {1}".format(datetime.datetime.now(), check)
+                                #print "{0} Outgoing file transfer {1}".format(datetime.datetime.now(), check)
+                                self.syncingIndicator()
                                 self.files[check] = hash(open(check).read()) 
                             except Exception, e:
                                 pass 
-                            time.sleep(0.5)
+                            #time.sleep(0.5)
 
     def shell(self):
         while True:

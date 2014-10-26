@@ -13,11 +13,14 @@ def download(host, port, username, password):
         except Exception, e:
             pass
 
-    print "{0} Incoming from {1} with data {2}".format(datetime.datetime.now(), host, dirs)
+    #print "{0} Incoming from {1} with data {2}".format(datetime.datetime.now(), host, dirs)
+    print ".",
     files = getFiles(host, port, username, password)
-    print "{0} Incoming from {1} with data {2}".format(datetime.datetime.now(), host, files)
+    #print "{0} Incoming from {1} with data {2}".format(datetime.datetime.now(), host, files)
+    print ".", 
     for x in files['data']:
-        print x
+        #print x
+        print ".",
         s = socket.socket()
         s.connect((host, port))
         s.send(json.dumps({"username":username, "password":password, "cmd":"download", "file":x}) + " EOT")
@@ -27,7 +30,8 @@ def download(host, port, username, password):
             if not d:
                 break
             data += d
-        print "{0} Incoming file from {1} with name {2}".format(datetime.datetime.now(), host, x)
+        #print "{0} Incoming file from {1} with name {2}".format(datetime.datetime.now(), host, x)
+        print ".",
         with open(x, 'wb') as file:
             file.write(zlib.decompress(base64.b64decode(data)))
         s.close()
